@@ -1,0 +1,63 @@
+{
+  "variables": {
+    "chef_version": "provisionerless",
+    "mirror": "http://cdimage.ubuntu.com"
+  },
+  "builders": [
+    {
+      "type": "qemu",
+      "boot_command": [
+        "<esc><wait>",
+        "install <wait>",
+        "preseed/url=http://{{ .HTTPIP }}:{{ .HTTPPort }}/ubuntu-14.04/preseed-openstack-ppc64le.cfg <wait>",
+        "debian-installer=en_US <wait>",
+        "auto <wait>",
+        "locale=en_US <wait>",
+        "kbd-chooser/method=us <wait>",
+        "keyboard-configuration/xkb-keymap=us <wait>",
+        "netcfg/get_hostname={{ .Name }} <wait>",
+        "netcfg/get_domain=vagrantup.com <wait>",
+        "fb=false <wait>",
+        "debconf/frontend=noninteractive <wait>",
+        "console-setup/ask_detect=false <wait>",
+        "console-keymaps-at/keymap=us <wait>",
+        "<enter><wait>"
+      ],
+      "accelerator": "kvm",
+      "boot_wait": "10s",
+      "disk_size": 2048,
+      "headless": true,
+      "http_directory": "http",
+      "iso_checksum": "7dbcf8b9b1222fa6dc8e0b6135bf7fdbe520ae4d",
+      "iso_checksum_type": "sha1",
+      "iso_url": "{{user `mirror`}}/releases/14.04/release/ubuntu-14.04.2-server-ppc64el.iso",
+      "ssh_username": "ubuntu",
+      "ssh_password": "ubuntu",
+      "ssh_port": 22,
+      "ssh_wait_timeout": "10000s",
+      "shutdown_command": "echo 'ubuntu'|sudo -S /sbin/shutdown -hP now",
+      "vm_name": "packer-ubuntu-14.04-ppc64le",
+      "output_directory": "packer-ubuntu-14.04-ppc64le-openstack",
+      "qemuargs": [ [ "-m", "1024m" ] ],
+      "qemu_binary": "qemu-kvm"
+    }
+  ],
+  "provisioners": [
+    {
+      "execute_command": "echo 'ubuntu' | {{.Vars}} sudo -E -S bash '{{.Path}}'",
+      "scripts": [
+        "scripts/ubuntu/update.sh",
+        "scripts/common/sshd.sh",
+        "scripts/ubuntu/networking.sh",
+        "scripts/ubuntu/openstack.sh",
+        "scripts/common/vmtools.sh",
+        "scripts/common/chef.sh",
+        "scripts/common/serial-hvc1.sh",
+        "scripts/ubuntu/cleanup.sh",
+        "scripts/common/minimize.sh"
+      ],
+      "type": "shell",
+      "environment_vars": [ "CHEF_VERSION={{user `chef_version`}}" ]
+    }
+  ]
+}
