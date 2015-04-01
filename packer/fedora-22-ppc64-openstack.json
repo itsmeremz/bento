@@ -1,0 +1,50 @@
+{
+  "builders": [
+    {
+      "boot_command": [
+        "<tab> text ks=http://{{ .HTTPIP }}:{{ .HTTPPort }}/fedora-22/ks-openstack-ppc64le.cfg<enter><wait>"
+      ],
+      "accelerator": "kvm",
+      "boot_wait": "10s",
+      "disk_size": 2048,
+      "headless": true,
+      "http_directory": "http",
+      "iso_checksum": "ad105e383d7d2fff8a0f92344d471878ac1a105bda74c41decb955cc91fcbfd7",
+      "iso_checksum_type": "sha256",
+      "iso_url": "{{user `mirror`}}/fedora-secondary/releases/testing/22_Alpha/Server/ppc64/iso/Fedora-Server-DVD-ppc64-22.iso",
+      "output_directory": "packer-fedora-22-ppc64-openstack",
+      "qemuargs": [ [ "-m", "1024m" ] ],
+      "qemu_binary": "qemu-kvm",
+      "shutdown_command": "echo 'fedora'|sudo -S /sbin/halt -h -p",
+      "ssh_password": "fedora",
+      "ssh_port": 22,
+      "ssh_username": "fedora",
+      "ssh_wait_timeout": "10000s",
+      "type": "qemu",
+      "vm_name": "packer-fedora-22-ppc64"
+    }
+  ],
+  "provisioners": [
+    {
+      "environment_vars": [
+        "CHEF_VERSION={{user `chef_version`}}"
+      ],
+      "execute_command": "echo 'fedora' | {{.Vars}} sudo -S -E bash '{{.Path}}'",
+      "scripts": [
+        "scripts/fedora/fix-slow-dns.sh",
+        "scripts/common/sshd.sh",
+        "scripts/common/vmtools.sh",
+        "scripts/common/chef.sh",
+        "scripts/fedora/openstack.sh",
+        "scripts/common/serial-hvc1.sh",
+        "scripts/fedora/cleanup.sh",
+        "scripts/common/minimize.sh"
+      ],
+      "type": "shell"
+    }
+  ],
+  "variables": {
+    "chef_version": "provisionerless",
+    "mirror": "http://packages.osuosl.org"
+  }
+}
