@@ -45,6 +45,6 @@
   ],
   "variables": {
     "chef_version": "provisionerless",
-    "mirror": "http://mirror.chpc.utah.edu/pub/"
+    "mirror": "http://packages.osuosl.org"
   }
 }
